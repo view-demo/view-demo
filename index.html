@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>GitHub &amp; BitBucket View Demo</title>
+	<link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
+	<style>
+		:root {
+			--primary-color: #4285F4;
+			--secondary-color: #34A853;
+			--background-color: #f8f9fa;
+			--text-color: #202124;
+			--accent-color: #EA4335;
+		}
+		body {
+			background-color: var(--background-color);
+			color: var(--text-color);
+			font-family: 'Roboto', sans-serif;
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+			margin: 0;
+		}
+		.header {
+			padding: 20px;
+			text-align: right;
+			background-color: #ffffff;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		}
+		.header a {
+			color: var(--text-color);
+			text-decoration: none;
+			margin-left: 15px;
+			font-size: 14px;
+			transition: color 0.3s ease;
+		}
+		.header a:hover {
+			color: var(--primary-color);
+		}
+		main {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: flex-start;
+			padding: 2rem 1rem;
+		}
+		.logo {
+			margin-bottom: 20px;
+		}
+		#previewform {
+			width: 100%;
+			max-width: 760px;
+			margin: 0 auto;
+			position: sticky;
+			top: 0;
+			z-index: 100;
+			background-color: var(--background-color);
+			padding: 15px 15px 0px 15px;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+		}
+		h1 {
+			color: var(--primary-color);
+			font-size: 2.5rem;
+			margin-bottom: 1rem;
+			text-align: center;
+			font-weight: 700;
+		}
+		.search-container {
+			display: flex;
+			align-items: center;
+			padding: 4px;
+			position: relative;
+			box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+			border-radius: 30px;
+			transition: box-shadow 0.3s ease;
+		}
+		.search-container:focus-within {
+			box-shadow: 0 1px 6px rgba(32,33,36,0.5);
+		}
+		input[type="url"] {
+			border: 1px solid #dadce0;
+			border-radius: 30px;
+			outline: none;
+			font-size: 16px;
+			padding: 12px 16px;
+			background-color: transparent;
+			width: 100%;
+		}
+		button#preview-button {
+			background-color: var(--primary-color);
+			border: none;
+			border-radius: 50%;
+			color: #ffffff;
+			font-size: 14px;
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			right: 12px;
+			display: flex;			
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			user-select: none;
+			transition: background-color 0.3s, transform 0.2s;
+			animation: pulse 2s infinite;
+		}
+		@keyframes pulse {
+			0% {
+				box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.7);
+			}
+			70% {
+				box-shadow: 0 0 0 10px rgba(66, 133, 244, 0);
+			}
+			100% {
+				box-shadow: 0 0 0 0 rgba(66, 133, 244, 0);
+			}
+		}
+		button#preview-button:hover {
+			background-color: #3367d6;
+			transform: scale(1.05);
+		}
+		button#preview-button:active {
+			transform: scale(0.95);
+		}
+		button#clear-button {
+			display: none;
+			width: auto;
+			background-color: transparent;
+			border: none;
+			color: var(--primary-color);
+			padding: 5px 0;
+			margin: 0px auto 0;
+			font-size: 14px;
+			font-weight: 400;
+			cursor: pointer;
+			text-decoration: underline;
+			transition: color 0.3s ease;
+			text-align: center;
+		}
+		button#clear-button:hover {
+			color: var(--secondary-color);
+		}
+		#loading-indicator {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #ffffff;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 9999;
+		}
+		.spinner {
+			width: 60px;
+			height: 60px;
+			border: 5px solid #f3f3f3;
+			border-top: 5px solid var(--primary-color);
+			border-radius: 50%;
+			animation: spin 1s ease-in-out infinite;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			50% { transform: rotate(180deg); }
+			100% { transform: rotate(360deg); }
+		}
+		.sample-links {
+			margin-top: 2rem;
+			text-align: left;
+			background-color: var(--background-color);
+			padding: 20px;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+			width: 100%;
+			max-width: 800px;
+			transition: box-shadow 0.3s ease;
+		}
+		.sample-links:hover {
+			box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+		}
+		.sample-links h3 {
+			color: var(--primary-color);
+			margin-bottom: 1rem;
+			font-size: 1.5rem;
+			font-weight: 700;
+			text-align: center;
+		}
+		.sample-links table {
+			width: 100%;
+			border-collapse: separate;
+			border-spacing: 0 10px;
+		}
+		.sample-links td {
+			padding: 10px;
+			vertical-align: top;
+			transition: background-color 0.3s ease;
+		}
+		.sample-links tr:hover td {
+			background-color: rgba(66, 133, 244, 0.1);
+		}
+		.sample-links td:first-child {
+			font-weight: 500;
+			width: 40%;
+		}
+		.sample-links button {
+			color: var(--primary-color);
+			background-color: transparent;
+			border: 2px solid var(--primary-color);
+			border-radius: 20px;
+			padding: 8px 16px;
+			font-weight: 500;
+			transition: all 0.3s ease;
+			cursor: pointer;
+			outline: none;
+			width: 100%;
+		}
+		.sample-links button:hover {
+			color: #ffffff;
+			background-color: var(--primary-color);
+			transform: translateY(-2px);
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+		}
+		.sample-links button:active {
+			transform: translateY(0);
+			box-shadow: none;
+		}
+		.footer {
+			padding: 15px;
+			text-align: center;
+			font-size: 0.9rem;
+			color: #70757a;
+		}
+		.instructions {
+			text-align: center;
+			margin-bottom: 1.5rem;
+			max-width: 600px;
+			font-size: 1rem;
+			line-height: 1.5;
+			padding: 0 15px;
+		}
+		@media (max-width: 768px) {
+			h1 {
+				font-size: 2rem;
+			}
+			.instructions {
+				font-size: 0.9rem;
+			}
+			.sample-links td {
+				display: block;
+				width: 100%;
+			}
+			.sample-links td:first-child {
+				width: 100%;
+			}
+		}
+	</style>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+	<div id="loading-indicator">
+		<div class="spinner"></div>
+	</div>
+	<main>
+		<div class="logo">
+			<h1>View Demo</h1>
+		</div>
+		<div class="instructions">
+			<p>Enter the URL of an HTML file from GitHub or BitBucket to preview it. You can also try our sample links below.</p>
+		</div>
+		<form id="previewform" onsubmit="event.preventDefault(); previewFile();">
+			<div class="search-container">
+				<input type="url" id="file" placeholder="Enter URL of HTML file" required autofocus>
+				<button type="submit" id="preview-button"><i class="fas fa-eye"></i></button>
+			</div>
+			<button type="button" id="clear-button">Clear URL</button>
+		</form>
+		<div class="sample-links">
+			<h3>Sample Links</h3>
+			<table>
+				<tr>
+					<td><button onclick="setFileValue('https://github.com/tanghoong/mockup/blob/master/sample/bootstrap-5-album.html')">Photo Gallery</button></td>
+					<td>Responsive layout with Bootstrap 5</td>
+				</tr>
+				<tr>
+					<td><button onclick="setFileValue('https://github.com/tanghoong/mockup/blob/master/sample/bulma-landing-page.html')">Landing Page</button></td>
+					<td>Responsive design with Bulma</td>
+				</tr>
+				<tr>
+					<td><button onclick="setFileValue('https://github.com/tanghoong/mockup/blob/master/sample/foundation-blog-template.html')">Blog Template</button></td>
+					<td>Clean layout with Foundation</td>
+				</tr>
+				<tr>
+					<td><button onclick="setFileValue('https://github.com/tanghoong/mockup/blob/master/sample/tailwind-dashboard.html')">Dashboard</button></td>
+					<td>Responsive design with Tailwind</td>
+				</tr>
+			</table>
+		</div>
+	</main>
+	<footer class="footer">
+		<p>&copy; 2023 Jerzy Głowacki under Apache License 2.0. Illustrated by tanghoong.</p>
+	</footer>
+	<script src="/htmlpreview.js"></script>
+	<script>
+		function setFileValue(url) {
+			document.getElementById('file').value = url;
+			toggleClearButton();
+		}
+
+		function previewFile() {
+			const fileUrl = document.getElementById('file').value;
+			location.href = '/?' + fileUrl;
+		}
+
+		function clearInput() {
+			document.getElementById('file').value = '';
+			toggleClearButton();
+		}
+
+		function toggleClearButton() {
+			const input = document.getElementById('file');
+			const clearButton = document.getElementById('clear-button');
+			clearButton.style.display = input.value ? 'block' : 'none';
+		}
+
+		window.addEventListener('load', function() {
+			document.getElementById('previewform').style.display = 'block';
+			document.getElementById('loading-indicator').style.display = 'flex';
+			
+			const input = document.getElementById('file');
+			const clearButton = document.getElementById('clear-button');
+
+			input.addEventListener('input', toggleClearButton);
+			clearButton.addEventListener('click', clearInput);
+			
+			// Function to check if all resources are loaded
+			function checkResourcesLoaded() {
+				if (document.readyState === 'complete') {
+					// All resources are loaded, fade out the loader
+					const loadingIndicator = document.getElementById('loading-indicator');
+					loadingIndicator.style.opacity = '0';
+					setTimeout(() => {
+						loadingIndicator.style.display = 'none';
+						document.body.style.visibility = 'visible';
+					}, 1000); // Wait for fade out animation to complete
+				} else {
+					// If not all resources are loaded, check again after a short delay
+					setTimeout(checkResourcesLoaded, 100);
+				}
+			}
+
+			// Start checking if resources are loaded
+			checkResourcesLoaded();
+		});
+	</script>
+</body>
+</html>
