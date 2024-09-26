@@ -55,4 +55,4 @@ These sample links provide users with quick access to various HTML templates and
 
 ## License
 
-&copy; 2023 Jerzy Głowacki under Apache License 2.0. Illustrated by tanghoong.
+&copy; 2019 niutech under Apache License 2.0. Illustrated by tanghoong.
